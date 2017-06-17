@@ -28,7 +28,12 @@ class QRZCallsignLookupFailure(QRZError):
 class QRZCallsign:
 
 	def __init__(self, node):
-		self.callsign_node = node.getElementsByTagName("Callsign")[0]
+                callsign_nodes = node.getElementsByTagName("Callsign")
+
+                if len(callsign_nodes) < 1:
+                        raise QRZCallsignLookupFailure("Callsign lookup failed.")
+                        
+		self.callsign_node = callsign_nodes[0]
 		self.casts = {
 			"lat": float,
 			"lon": float
@@ -84,8 +89,12 @@ class QRZSession:
 		"""
 		Searches QRZ for a callsign. Returns a QRZCallsign.
 		"""
-		callsign_object = QRZCallsign(self.__request(callsign=callsign))
 
+                try:
+		        callsign_object = QRZCallsign(self.__request(callsign=callsign))
+                except Exception as e:
+                        raise e
+                        
 		if callsign.lower() != callsign_object["call"]:
 			raise QRZCallsignLookupFailure("Callsign lookup failed.")
 
