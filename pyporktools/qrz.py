@@ -6,7 +6,7 @@ from threading import RLock
 
 
 def get_text_from(node, name):
-	if not node:
+        if not node:
 		return None
 	tags = node.getElementsByTagName(name)
 	if not tags:
@@ -65,7 +65,7 @@ class QRZSession:
 		if self.key:
 			params.update({"s": self.key})
 
-		responce = post("https://xml.qrz.com/xml", data=params)
+		responce = post("https://xml.qrz.com/xml/current", data=params)
 
 		if not responce:
 			raise QRZConnectionError("Failed to execute request")
