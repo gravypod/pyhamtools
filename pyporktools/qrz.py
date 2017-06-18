@@ -4,9 +4,8 @@ from xml.dom.minidom import parseString
 from cachetools import cachedmethod, LRUCache
 from threading import RLock
 
-
 def get_text_from(node, name):
-        if not node:
+	if not node:
 		return None
 	tags = node.getElementsByTagName(name)
 	if not tags:
@@ -28,10 +27,10 @@ class QRZCallsignLookupFailure(QRZError):
 class QRZCallsign:
 
 	def __init__(self, node):
-                callsign_nodes = node.getElementsByTagName("Callsign")
+		callsign_nodes = node.getElementsByTagName("Callsign")
 
-                if len(callsign_nodes) < 1:
-                        raise QRZCallsignLookupFailure("Callsign lookup failed.")
+		if len(callsign_nodes) < 1:
+			raise QRZCallsignLookupFailure("Callsign lookup failed.")
                         
 		self.callsign_node = callsign_nodes[0]
 		self.casts = {
@@ -62,7 +61,7 @@ class QRZSession:
 	def __request(self, **kwargs):
 		"""
 		Automatically call and return the result of an API query to qrz.
-		Raises QRZConnectionError if it failed.
+		Raise an exception if it failed.
 		"""
 
 		params = kwargs
@@ -70,12 +69,11 @@ class QRZSession:
 		if self.key:
 			params.update({"s": self.key})
 
-		responce = post("https://xml.qrz.com/xml/current", data=params)
-
-		if not responce:
-			raise QRZConnectionError("Failed to execute request")
-
-		return parseString(responce.text)
+		try:
+			responce = post("https://xml.qrz.com/xml/current", data=params)
+			return parseString(responce.text)
+		except Exception as e:
+			raise e
 
 	def __login(self, username, password):
 		"""
@@ -90,10 +88,10 @@ class QRZSession:
 		Searches QRZ for a callsign. Returns a QRZCallsign.
 		"""
 
-                try:
-		        callsign_object = QRZCallsign(self.__request(callsign=callsign))
-                except Exception as e:
-                        raise e
+		try:
+			callsign_object = QRZCallsign(self.__request(callsign=callsign))
+		except Exception as e:
+			raise e
                         
 		if callsign.lower() != callsign_object["call"]:
 			raise QRZCallsignLookupFailure("Callsign lookup failed.")
