@@ -1,9 +1,6 @@
 from requests import post
-from operator import attrgetter
+from functools import lru_cache
 from xml.dom.minidom import parseString
-from cachetools import cachedmethod, LRUCache
-from threading import RLock
-
 
 def get_text_from(node, name):
 	if not node:
@@ -37,7 +34,7 @@ class QRZCallsign:
 
 		if len(callsign_nodes) < 1:
 			raise QRZCallsignLookupFailure("Callsign lookup failed.")
-                        
+
 		self.callsign_node = callsign_nodes[0]
 		self.casts = {
 			"lat": float,
@@ -60,9 +57,12 @@ class QRZCallsign:
 
 class QRZSession:
 	def __init__(self, username, password, max_size=1000):
-		self.cache = LRUCache(maxsize=max_size)
-		self.lock = RLock()
 		self.key = None
+
+		# Hack to get configurable cache sizes.
+		cache = lru_cache(maxsize=max_size)
+		self.lookup_callsign = cache(self.__lookup_callsign)
+
 		self.__login(username, password)
 
 	def __request(self, **kwargs):
@@ -89,8 +89,7 @@ class QRZSession:
 		responce = self.__request(username=username, password=password)
 		self.key = get_text_from(responce, "Key")
 
-	@cachedmethod(cache=attrgetter('cache'), lock=attrgetter('lock'))
-	def lookup_callsign(self, callsign):
+	def __lookup_callsign(self, callsign):
 		"""
 		Searches QRZ for a callsign. Returns a QRZCallsign.
 		"""
@@ -99,7 +98,7 @@ class QRZSession:
 			callsign_object = QRZCallsign(self.__request(callsign=callsign))
 		except Exception as e:
 			raise e
-                        
+
 		if callsign.lower() != callsign_object["call"]:
 			raise QRZCallsignLookupFailure("Callsign lookup failed.")
 

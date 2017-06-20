@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from setuptools import setup
 
-req = ['pyqrz','cachetools','pykml']
+req = ['pyqrz','pykml','requests']
 
 setup(name="pyporktools",
 	packages=["pyporktools"],
