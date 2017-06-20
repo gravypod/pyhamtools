@@ -4,6 +4,7 @@ from xml.dom.minidom import parseString
 from cachetools import cachedmethod, LRUCache
 from threading import RLock
 
+
 def get_text_from(node, name):
 	if not node:
 		return None
@@ -13,16 +14,21 @@ def get_text_from(node, name):
 	requested_node = tags[0]
 	if not requested_node.firstChild:
 		return None
+
 	return requested_node.firstChild.data
+
 
 class QRZError(Exception):
 	pass
 
+
 class QRZConnectionError(QRZError):
 	pass
 
+
 class QRZCallsignLookupFailure(QRZError):
 	pass
+
 
 class QRZCallsign:
 
@@ -50,6 +56,7 @@ class QRZCallsign:
 			item = self.casts[key](item)
 
 		return item
+
 
 class QRZSession:
 	def __init__(self, username, password, max_size=1000):
