@@ -1,1 +1,1 @@
-from .qrz import QRZCallsign, QRZSession, QRZCallsign, QRZCallsignLookupFailure, QRZConnectionError, QRZError
+from .qrz import QRZCallsign, QRZSession, QRZCallsignLookupFailure, QRZConnectionError, QRZError
